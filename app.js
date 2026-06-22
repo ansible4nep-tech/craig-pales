@@ -1,8 +1,8 @@
-// Craig Pales Cartoon Studio - Application Logic (Simplified)
+// Craig Pales Cartoon Studio - Application Logic (Simplified Viewer Only)
 
 // Global State
 const state = {
-    version: 5,
+    version: 6,
     activeTab: 'storyboard',
     storyboard: [
         {
@@ -15,6 +15,83 @@ const state = {
             pose: 'standing-calm',
             dialogue: "This city is filled with crime and corruption. I must watch from the shadows.",
             specialEffect: ''
+        },
+        {
+            id: 2,
+            title: "Shaolin Training (Learning Kung Fu)",
+            desc: "Flashback: Young Craig learns kung fu in the Dojo under the guidance of the Temple Elder, who warns him never to use the forbidden arts.",
+            bg: 'dojo',
+            outfit: 'young-robe',
+            expression: 'calm',
+            pose: 'standing-calm',
+            dialogue: "Remember Craig: you must never use the forbidden arts under any circumstance!",
+            specialEffect: 'training'
+        },
+        {
+            id: 3,
+            title: "The Kidnapping (Ambushed)",
+            desc: "Flashback: Mysterious syndicate agents ambush Craig at the temple.",
+            bg: 'shaolin',
+            outfit: 'monk-robe',
+            expression: 'determined',
+            pose: 'fighting',
+            dialogue: "Who are you? Stay back! I am sworn to peace!",
+            specialEffect: 'ambush'
+        },
+        {
+            id: 4,
+            title: "The Subway Captivity",
+            desc: "Craig awakens chained to the wall of a dark NYC subway tunnel.",
+            bg: 'subway',
+            outfit: 'monk-robe',
+            expression: 'determined',
+            pose: 'standing-calm',
+            dialogue: "They brought me to New York in chains. But steel cannot hold me.",
+            specialEffect: ''
+        },
+        {
+            id: 5,
+            title: "Breaking the Chains (Escape)",
+            desc: "Craig easily shatters the metal chains using simple Shaolin body strength.",
+            bg: 'subway',
+            outfit: 'monk-robe',
+            expression: 'determined',
+            pose: 'victory',
+            dialogue: "I am free. Now I must find a way to the surface.",
+            specialEffect: 'chains'
+        },
+        {
+            id: 6,
+            title: "The Alleyway Confrontation",
+            desc: "Emerging into a gritty New York alley, Craig witnesses gang members threatening a local citizen.",
+            bg: 'new-york',
+            outfit: 'monk-robe',
+            expression: 'determined',
+            pose: 'fighting',
+            dialogue: "Let the citizen go. There is no need for violence here.",
+            specialEffect: ''
+        },
+        {
+            id: 7,
+            title: "First Slice (Forbidden Art Unleashed)",
+            desc: "Faced with drawing blades, Craig punches a thug, only for the forbidden fist to slice him in half like butter.",
+            bg: 'new-york',
+            outfit: 'monk-robe',
+            expression: 'fury',
+            pose: 'fighting',
+            dialogue: "The Forbidden Fist! It cuts through bone and steel like butter!",
+            specialEffect: 'blood'
+        },
+        {
+            id: 8,
+            title: "Vigilante Rising (The Vigilante Suit)",
+            desc: "Craig stands on a dark NYC rooftop in his new dark vigilante hooded outfit, committing to clean the streets.",
+            bg: 'rooftop',
+            outfit: 'vigilante-outfit',
+            expression: 'determined',
+            pose: 'victory',
+            dialogue: "I will hide my face in this dark suit. I am the protector of New York.",
+            specialEffect: 'rooftop-fury'
         }
     ],
     selectedFrameId: 1,
@@ -26,7 +103,7 @@ const state = {
 function saveToLocalStorage() {
     try {
         if (window.localStorage) {
-            localStorage.setItem('craig_pales_storyboard_v5', JSON.stringify(state.storyboard));
+            localStorage.setItem('craig_pales_storyboard_v6', JSON.stringify(state.storyboard));
             localStorage.setItem('craig_pales_storyboard_version', state.version.toString());
         }
     } catch(e) {
@@ -39,7 +116,7 @@ function loadFromLocalStorage() {
         if (window.localStorage) {
             const savedVersion = localStorage.getItem('craig_pales_storyboard_version');
             if (savedVersion && parseInt(savedVersion, 10) === state.version) {
-                const saved = localStorage.getItem('craig_pales_storyboard_v5');
+                const saved = localStorage.getItem('craig_pales_storyboard_v6');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -49,8 +126,8 @@ function loadFromLocalStorage() {
                     }
                 }
             } else {
-                localStorage.removeItem('craig_pales_storyboard');
                 localStorage.removeItem('craig_pales_storyboard_v5');
+                localStorage.removeItem('craig_pales_storyboard_v6');
                 localStorage.removeItem('craig_pales_storyboard_version');
             }
         }
@@ -626,156 +703,11 @@ function selectStoryboardFrame(id) {
     const frame = state.storyboard.find(f => f.id === id);
     if (!frame) return;
 
-    // Load values into editor inputs
-    const setVal = (elId, val) => {
-        const el = document.getElementById(elId);
-        if (el) el.value = val;
-    };
-    
-    setVal('frame-title-input', frame.title || '');
-    setVal('frame-desc-input', frame.desc || '');
-    setVal('frame-bg-select', frame.bg || 'new-york');
-    setVal('frame-outfit-select', frame.outfit || 'monk-robe');
-    setVal('frame-expr-select', frame.expression || 'determined');
-    setVal('frame-pose-select', frame.pose || 'standing-calm');
-    setVal('frame-dialogue-input', frame.dialogue || '');
-    setVal('frame-effect-select', frame.specialEffect || '');
-
     // Update Storyboard Scene Preview
     updateDashboardPreview();
 }
 
 function initStoryboardEditor() {
-    const updateCurrentFrameField = (field, value) => {
-        const frame = state.storyboard.find(f => f.id === state.selectedFrameId);
-        if (frame) {
-            frame[field] = value;
-            updateDashboardPreview();
-            renderStoryboardTimeline();
-            saveToLocalStorage();
-        }
-    };
-
-    const bindSafeListener = (id, event, handler) => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener(event, handler);
-    };
-
-    bindSafeListener('frame-title-input', 'input', (e) => {
-        updateCurrentFrameField('title', e.target.value);
-    });
-    
-    bindSafeListener('frame-desc-input', 'input', (e) => {
-        updateCurrentFrameField('desc', e.target.value);
-    });
-
-    bindSafeListener('frame-dialogue-input', 'input', (e) => {
-        updateCurrentFrameField('dialogue', e.target.value);
-    });
-
-    bindSafeListener('frame-bg-select', 'change', (e) => {
-        updateCurrentFrameField('bg', e.target.value);
-    });
-
-    bindSafeListener('frame-outfit-select', 'change', (e) => {
-        updateCurrentFrameField('outfit', e.target.value);
-    });
-
-    bindSafeListener('frame-expr-select', 'change', (e) => {
-        updateCurrentFrameField('expression', e.target.value);
-    });
-
-    bindSafeListener('frame-pose-select', 'change', (e) => {
-        updateCurrentFrameField('pose', e.target.value);
-    });
-
-    bindSafeListener('frame-effect-select', 'change', (e) => {
-        updateCurrentFrameField('specialEffect', e.target.value);
-    });
-
-    // Add Frame Button
-    bindSafeListener('add-frame-btn', 'click', () => {
-        const newId = state.storyboard.length > 0 ? Math.max(...state.storyboard.map(f => f.id)) + 1 : 1;
-        const newFrame = {
-            id: newId,
-            title: `New Scene Frame ${newId}`,
-            desc: "Describe the action context",
-            bg: 'new-york',
-            outfit: 'monk-robe',
-            expression: 'determined',
-            pose: 'standing-calm',
-            dialogue: "New dialogue here.",
-            specialEffect: ''
-        };
-        state.storyboard.push(newFrame);
-        state.selectedFrameId = newId;
-        state.dashboardFrameIndex = state.storyboard.length - 1;
-        renderStoryboardTimeline();
-        selectStoryboardFrame(newId);
-        saveToLocalStorage();
-    });
-
-    // Delete Frame Button
-    bindSafeListener('delete-frame-btn', 'click', () => {
-        if (state.storyboard.length <= 1) {
-            alert("Cannot delete the last frame!");
-            return;
-        }
-        state.storyboard = state.storyboard.filter(f => f.id !== state.selectedFrameId);
-        state.selectedFrameId = state.storyboard[0].id;
-        state.dashboardFrameIndex = 0;
-        
-        renderStoryboardTimeline();
-        selectStoryboardFrame(state.selectedFrameId);
-        saveToLocalStorage();
-    });
-
-    // Import / Export Buttons Binding
-    bindSafeListener('export-episode-btn', 'click', () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.storyboard, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `craig_pales_episode_${Date.now()}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-    });
-
-    const importFileInput = document.getElementById('import-episode-file');
-    bindSafeListener('import-episode-btn', 'click', () => {
-        if (importFileInput) importFileInput.click();
-    });
-
-    if (importFileInput) {
-        importFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    const parsed = JSON.parse(event.target.result);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        state.storyboard = parsed;
-                        state.selectedFrameId = parsed[0].id;
-                        state.dashboardFrameIndex = 0;
-                        saveToLocalStorage();
-                        renderStoryboardTimeline();
-                        selectStoryboardFrame(state.selectedFrameId);
-                        alert("Episode Storyboard imported successfully!");
-                    } else {
-                        alert("Invalid JSON format. Must be an array of scenes.");
-                    }
-                } catch(err) {
-                    alert("Error reading JSON file.");
-                    console.error(err);
-                }
-            };
-            reader.readAsText(file);
-            importFileInput.value = '';
-        });
-    }
-
     renderStoryboardTimeline();
     selectStoryboardFrame(state.selectedFrameId);
 }
